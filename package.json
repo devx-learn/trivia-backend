@@ -3,25 +3,34 @@
   "version": "0.0.0",
   "private": true,
   "proxy": {
-   "/": {
-     "target": "http://localhost:3000"
-   },
-   "/socket.io": {
-     "target": "ws://localhost:3000",
-     "ws": true
-   }
- },
+    "/": {
+      "target": "http://localhost:3000"
+    },
+    "/socket.io": {
+      "target": "ws://localhost:3000",
+      "ws": true
+    }
+  },
   "scripts": {
-    "start": "node ./bin/www"
+    "test": "jest --watchAll"
   },
   "dependencies": {
-    "body-parser": "~1.18.2",
-    "cookie-parser": "~1.4.3",
-    "debug": "~2.6.9",
-    "express": "~4.15.5",
+    "body-parser": "^1.18.2",
+    "cors": "^2.8.4",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "express-validator": "^4.3.0",
     "jade": "~1.11.0",
-    "morgan": "~1.9.0",
-    "serve-favicon": "~2.4.5",
+    "mysql": "^2.15.0",
+    "pg": "6.1.5",
+    "sequelize": "3.30.4",
+    "sequelize-cli": "^3.2.0",
     "socket.io": "^2.0.4"
+  },
+  "devDependencies": {
+    "babel-jest": "^22.2.0",
+    "jest": "^22.2.1",
+    "sequelize-mock": "^0.10.2",
+    "supertest": "^3.0.0"
   }
 }
