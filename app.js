@@ -1,63 +1,63 @@
 var express = require('express');
 var bodyParser = require('body-parser')
-var app = express();
 var User = require('./models').User
+var cors = require('cors')
+
+var app = express()
 
 app.use(express.static('public'))
 app.use(bodyParser.json())
+app.use (cors())
 
-const authorization = function(request, response, next){
-  const token = request.query.authToken || request.body.authToken
-  if(token){
+const authorization = function(req, res, next) {
+  const token = req.query.authToken || req.body.authToken
+  if(token) {
     User.findOne({
       where: {authToken: token}
-    }).then((user)=>{
-      if(user){
-        request.currentUser = user
+    }).then((user) => {
+      if(user) {
+        req.currentUser = user
         next()
-      }else{
-        response.status(401)
-        response.json({message:'Authorization Token Invalid'})
+      } else {
+        res.status(401)
+        res.json({message:'Authorization Token Invalid'})
       }
     })
-  }else{
-    response.status(401)
-    response.json({message: 'Authorization Token Required'})
+  } else {
+    res.status(401)
+    res.json({message: 'Authorization Token Required'})
   }
 }
 
-app.get('/', function (request, response) {
-  response.json({message: 'API Example App'})
-});
-
-app.get('/user',
+app.get('/users',
 authorization,
-function(request, response){
-  response.json({user: request.currentUser})
+function(req, res) {
+  res.json({user: req.currentUser})
 })
 
-app.post('/users', function(request, response){
-  User.create(
-    {
-      firstName: request.body.firstName,
-      lastName: request.body.lastName,
-      email: request.body.email,
-      password: request.body.password
-    }
-  ).then((user)=>{
-    response.json({
-      message: 'success',
-      user: user
+app.post('/users', (req, res) => {
+    req.checkBody('firstName','is required').notEmpty()
+    req.checkBody('lastName','is required').notEmpty()
+    req.checkBody('email','is required').notEmpty()
+    req.checkBody('password','is required').notEmpty()
+
+    req.getValidationResult()
+    .then((validationErrors) =>{
+        if(validationErrors.isEmpty()){
+            User.create({
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                password: password
+            }) .then((user)=>{
+                    res.status(201)
+                    res.json({user:user})
+                })
+        }else{
+            res.status(400)
+            res.json({errors: {validations: validationErrors.array()}})
+        }
     })
-  }).catch((error)=>{
-    response.status(400)
-    response.json({
-      message: "Unable to create User",
-      errors: error.errors
-    })
-  })
 })
 
-app.listen(4000, function () {
- console.log('Trivia Server listening on port 4000!');
-});
+module.exports = app
