@@ -97,9 +97,9 @@ class Trivia extends SocketApp {
         socket.join('game-' + this.gameId) //makes a unique id for game
         socket.emit('waiting')
 
-        if (this.players.length === 1) {
-          this.games.push(new Game({
-            io: this.io,
+        if (this.players.length === 1) { // determins how many players can play a single game
+          this.games.push(new Game({ //exicutes "game" component
+            io: this.io, // creates a new UUI game id
             room: 'game-' + this.gameId,
             players: this.players,
             questions: shuffle(this.questions)
