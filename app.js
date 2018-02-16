@@ -2,11 +2,13 @@ var express = require('express');
 var bodyParser = require('body-parser')
 var User = require('./models').User
 var cors = require('cors')
+var validator = require('express-validator')
 
 var app = express()
 
 app.use(express.static('public'))
 app.use(bodyParser.json())
+app.use(validator())
 app.use (cors())
 
 const authorization = function(req, res, next) {
@@ -41,19 +43,30 @@ app.post('/users', (req, res) => {
     req.checkBody('email','is required').notEmpty()
     req.checkBody('password','is required').notEmpty()
 
+    console.log(req.body);
+
+    const { firstName, lastName, email, password } = req.body
+
     req.getValidationResult()
-    .then((validationErrors) =>{
+    .then((validationErrors) => {
         if(validationErrors.isEmpty()){
             User.create({
                 firstName: firstName,
                 lastName: lastName,
                 email: email,
                 password: password
-            }) .then((user)=>{
-                    res.status(201)
-                    res.json({user:user})
+            })
+            .then((user)=>{
+                res.status(201)
+                res.json({user:user})
+            })
+            .catch((e) => {
+                res.status(400)
+                res.json({
+                    errors: [e]
                 })
-        }else{
+            })
+        } else {
             res.status(400)
             res.json({errors: {validations: validationErrors.array()}})
         }
