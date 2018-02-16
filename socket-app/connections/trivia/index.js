@@ -1,7 +1,7 @@
 const SocketApp = require('../../socket-app');
 const ANSWER_TIME = 30000; // 30 Seconds
 const request = require('request');
-const START_TIME = 15000;
+const START_TIME = 5000;
 const MAX_PLAYERS = 10
 /**
  * Shuffles array in place.
@@ -40,19 +40,23 @@ class Game {
     });
   }
 
+
+
+
   sendQuestion() {
     let _this = this;
-    let playerList = this.players.map(player =>{
+    let playerList = this.players.map(player => {
       return {
         username: player.username,
         score: player.score
       }
     })
-    this.players.forEach(player =>{
+    this.players.forEach(player => {
       player.socket.emit("player-list", playerList)
     })
     this.answerCount = 0;
     this.nextQuestionTimer = setTimeout(() => {
+
       _this.getNextQuestion((err, question) => {
         if (err) return console.log('Error getting question' + err);
         _this.currentQuestion = question;
@@ -70,7 +74,9 @@ class Game {
         })
       })
     }, 2000)
+
   }
+
   checkAnswer(player, answer) {
     this.answerCount++;
     player.socket.removeAllListeners('answer');
@@ -109,13 +115,13 @@ class Trivia extends SocketApp {
         let roomId = 'game-' + _this.gameId;
         socket.join(roomId, () => {
           socket.emit('waiting')
-          if (this.players.length === 1){
-            _this.startTimer = setTimeout(()=>{
+          if (this.players.length === 1) {
+            _this.startTimer = setTimeout(() => {
               _this.games.push(new Game({
                 room: _this.server.in(roomId),
                 players: _this.players,
               }))
-            },START_TIME)
+            }, START_TIME)
           }
           if (_this.players.length === MAX_PLAYERS) {
             clearTimeout(_this.startTimer);
@@ -128,7 +134,7 @@ class Trivia extends SocketApp {
         }) //makes a unique id for game
       })
     }
-    socket.on('disconnect', () => { })
+    socket.on('disconnect', () => {})
   }
 }
 module.exports = Trivia;
