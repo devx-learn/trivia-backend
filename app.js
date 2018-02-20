@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser')
 var User = require('./models').User
 var cors = require('cors')
+var Validators = require('express-validators')
 
 var app = express()
 
