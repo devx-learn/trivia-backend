@@ -2,13 +2,14 @@ var express = require('express');
 var bodyParser = require('body-parser')
 var User = require('./models').User
 var cors = require('cors')
-var Validators = require('express-validators')
+var validator = require('express-validator')
 
 var app = express()
 
 app.use(express.static('public'))
 app.use(bodyParser.json())
 app.use (cors())
+app.use(validator())
 
 const authorization = function(req, res, next) {
   const token = req.query.authToken || req.body.authToken
@@ -37,27 +38,44 @@ function(req, res) {
 })
 
 app.post('/users', (req, res) => {
-    req.checkBody('firstName','is required').notEmpty()
-    req.checkBody('lastName','is required').notEmpty()
-    req.checkBody('email','is required').notEmpty()
-    req.checkBody('password','is required').notEmpty()
+    req.checkBody('firstName', 'is required').notEmpty()
+    req.checkBody('lastName', 'is required').notEmpty()
+    req.checkBody('email', 'is required').notEmpty()
+    req.checkBody('password', 'is required').notEmpty()
 
     req.getValidationResult()
-    .then((validationErrors) =>{
-        if(validationErrors.isEmpty()){
+    .then((validationErrors) => {
+        if(validationErrors.isEmpty()) {
+            const { firstName, lastName, email, password } = req.body
+
             User.create({
                 firstName: firstName,
                 lastName: lastName,
                 email: email,
                 password: password
-            }) .then((user)=>{
-                    res.status(201)
-                    res.json({user:user})
+            })
+            .then((user) => {
+                res.status(201)
+                res.json({
+                    user:user
                 })
-        }else{
+            })
+            .catch(e => {
+                res.status(400)
+                res.json({
+                    errors: [`error creating user: ` + e]
+                })
+            })
+        } else {
             res.status(400)
             res.json({errors: {validations: validationErrors.array()}})
         }
+    })
+    .catch(e => {
+        res.status(400)
+        res.json({
+            errors: [`error validating create user: `+e]
+        })
     })
 })
 
